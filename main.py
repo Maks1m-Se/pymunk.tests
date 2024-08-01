@@ -19,15 +19,18 @@ def convert_coordinates(point):
     return int(point[0]), int(600-point[1])
 
 class Ball():
-    def __init__(self, x, y, density):
+    def __init__(self, x, y, size):
         self.body = pymunk.Body()
         self.body.position = x, y
         self.shape = pymunk.Circle(self.body, 10)
-        self.shape.density = density
+        self.size = size
+        # reduce size range [10, 50] to density range [0.1, 1] 
+        # out_min + (x - in_min) * (out_max - out_min) / (in_max - in_min)
+        self.shape.density = 0.1 + (size - 10) * (1 - 0.1) / (50 - 10)
         self.shape.elasticity = 1
         space.add(self.body, self.shape)
     def draw(self):
-        pygame.draw.circle(display, (255,0,0), convert_coordinates(self.body.position), 10)
+        pygame.draw.circle(display, (255,0,0), convert_coordinates(self.body.position), self.size)
 
 class String():
     def __init__(self, body1, attachment, identifier="body"):
@@ -47,8 +50,8 @@ class String():
 
 ### GAME LOOP ###
 def game():
-    ball_1 = Ball(446, 472, 0.28) # x, y, density
-    ball_2 = Ball(442, 600, 0.3)
+    ball_1 = Ball(446, 472, 50) # x, y, size --> [between 10 and 50]
+    ball_2 = Ball(442, 600, 20) # x, y, size --> [between 10 and 50]
     string_1 = String(ball_1.body, (450,300), "position")
     string_2 = String(ball_1.body, ball_2.body) # identifier automatically "body"
     while True:
